@@ -1,0 +1,80 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run All Integration Tests",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/app_test.dart",
+        "-d",
+        "linux"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Form Validation Test",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/form_validation_test.dart",
+        "-d",
+        "linux"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Resident Toggle Test",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/resident_toggle_test.dart",
+        "-d",
+        "linux"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Reset Button Test",
+      "type": "shell",
+      "command": "flutter",
+      "args": [
+        "test",
+        "integration_test/reset_button_test.dart",
+        "-d",
+        "linux"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    }
+  ]
+}
