@@ -16,7 +16,7 @@
         "-d",
         "linux"
       ],
-      "console": "terminal"
+      "console": "debugConsole"
     },
     {
       "name": "Run Form Validation Test",
@@ -26,8 +26,7 @@
       "args": [
         "-d",
         "linux"
-      ],
-      "console": "terminal"
+      ]
     },
     {
       "name": "Run Resident Toggle Test",
@@ -37,8 +36,7 @@
       "args": [
         "-d",
         "linux"
-      ],
-      "console": "terminal"
+      ]
     },
     {
       "name": "Run Reset Button Test",
@@ -48,8 +46,7 @@
       "args": [
         "-d",
         "linux"
-      ],
-      "console": "terminal"
+      ]
     }
   ]
 }
