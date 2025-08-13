@@ -250,6 +250,177 @@ integration_test/
 - Integration testing for end-to-end user workflows
 - Debugger-friendly test structure for development
 
+## 🔧 Technical Architecture Deep Dive
+
+### Form Builder Core Logic
+
+The app uses a **reactive architecture** where:
+
+1. **JSON Parser** (`_generateForm()` in main.dart:95)
+   - Validates JSON structure requires `fields` array
+   - Handles parsing errors with user-friendly messages
+   - Triggers UI rebuild on successful parsing
+
+2. **Dynamic Field Generation** (`_buildFormField()` in main.dart:192)
+   - Switch-case pattern for field type resolution
+   - ValueKey assignment for testing widget identification
+   - Conditional rendering based on `dependsOn`/`dependsValue` logic
+
+3. **Dependency Management**
+   - Fields check dependency state in real-time (main.dart:204-207)
+   - FormBuilder state triggers rebuilds on toggle changes
+   - `setState()` called in toggle `onChanged` to refresh dependent fields
+
+### Key Files and Responsibilities
+
+| File | Purpose | Key Functions |
+|------|---------|---------------|
+| `lib/main.dart` | Main app logic | `_generateForm()`, `_buildFormField()`, `_buildFormPanel()` |
+| `integration_test/app_test.dart` | Comprehensive test suite | All 4 tests in single file for debugging |
+| `.vscode/launch.json` | Debug configurations | Individual test runners + all tests |
+| `.vscode/tasks.json` | VS Code tasks | Terminal-based test execution |
+
+### State Management Pattern
+
+```dart
+// Form state flows:
+JSON Input → _generateForm() → setState() → Widget Rebuild
+Toggle Change → onChanged() → setState() → Dependent Field Update
+Form Submit → FormBuilder.saveAndValidate() → Success/Error Feedback
+```
+
+## 📝 Development Session Notes
+
+### Initial Development (Session 1)
+- **Goal**: Create dynamic form builder from JSON with testing
+- **Challenges Solved**:
+  - Split view package API compatibility (switched from `multi_split_view` to `split_view`)
+  - Widget type casting in tests (FormBuilderSwitch vs Switch)
+  - Form reset functionality with default value restoration
+- **Key Decisions**:
+  - Used flutter_form_builder for robust validation
+  - Implemented conditional dependencies via custom logic
+  - Age validation set to 20-85 years per requirements
+  - Resident toggle defaults to ON, controls newsletter subscription
+
+### Testing Implementation Strategy
+- **Integration over Unit**: Focus on end-to-end user workflows
+- **Widget Key Strategy**: ValueKey(fieldName) for reliable widget finding
+- **Test Independence**: Each test starts fresh app instance
+- **Visual Verification**: Tests check both widget state and user-visible feedback
+
+## 🚀 Future Enhancement Roadmap
+
+### High Priority
+- [ ] **Field Type Extensions**: Add date picker, file upload, radio buttons
+- [ ] **JSON Schema Validation**: Implement JSON schema validation for form definitions
+- [ ] **Form Themes**: Support for custom styling via JSON configuration
+- [ ] **Data Persistence**: Save/load form data locally or to cloud
+
+### Medium Priority  
+- [ ] **Drag & Drop Builder**: Visual form builder interface
+- [ ] **Conditional Branching**: Advanced logic with AND/OR conditions
+- [ ] **Field Groups**: Organize fields into collapsible sections
+- [ ] **Multi-page Forms**: Step-by-step form wizard functionality
+
+### Low Priority
+- [ ] **Form Analytics**: Track user interaction patterns
+- [ ] **Export Options**: PDF, CSV, JSON data export
+- [ ] **Internationalization**: Multi-language support
+- [ ] **Accessibility**: Screen reader and keyboard navigation enhancements
+
+## 🐛 Known Issues & Limitations
+
+### Current Limitations
+1. **Single Dependency**: Fields can only depend on one other field (no complex logic)
+2. **Basic Field Types**: Limited to text, email, number, dropdown, checkbox, toggle
+3. **No Nested Objects**: JSON schema doesn't support nested form structures
+4. **Static Validation**: Validation rules are predefined, not configurable via JSON
+
+### Troubleshooting Common Issues
+
+#### Tests Not Running in VS Code
+```bash
+# Ensure Dart/Flutter extensions are installed
+# Try running from terminal first:
+flutter test integration_test/app_test.dart -d linux
+```
+
+#### Split View Not Resizing
+```dart
+// Issue: Panels not responsive
+// Solution: Ensure parent widget has defined constraints
+// Check SplitView is wrapped in Expanded/Flexible widget
+```
+
+#### Form Validation Errors
+```bash
+# Common cause: Missing required fields
+# Check JSON schema includes required: true for mandatory fields
+# Verify field names match between JSON and form submission
+```
+
+## 💡 Development Tips for Future Sessions
+
+### Quick Start Checklist
+1. **Environment**: Ensure Flutter 3.8.1+ with Linux/Chrome support
+2. **Dependencies**: Run `flutter pub get` after pulling changes
+3. **Testing**: Start with `flutter test integration_test/app_test.dart -d linux`
+4. **Development**: Use `flutter run -d linux` for live development
+
+### Code Organization Philosophy
+- **Single File App**: All logic in `main.dart` for simplicity (suitable for demo/prototype)
+- **Test Separation**: Individual test files + comprehensive suite for flexibility
+- **Configuration First**: VS Code configs provided for immediate productivity
+
+### JSON Schema Extension Pattern
+```json
+// To add new field types, follow this pattern:
+{
+  "name": "newField",
+  "type": "newType",
+  "label": "Display Label",
+  "required": false,
+  "customProperty": "customValue",
+  // Add conditional dependency:
+  "dependsOn": "otherFieldName",
+  "dependsValue": expectedValue
+}
+```
+
+### Testing New Features
+1. Add field type to switch statement in `_buildFormField()`
+2. Create individual test file in `integration_test/`
+3. Add test to comprehensive suite in `app_test.dart`
+4. Update VS Code launch/tasks configurations
+5. Document in README field types table
+
+## 🔍 Quick Reference
+
+### Essential Commands
+```bash
+# Development
+flutter run -d linux
+flutter pub get
+
+# Testing (choose one)
+flutter test integration_test/app_test.dart -d linux          # All tests
+flutter test integration_test/form_validation_test.dart -d linux  # Individual test
+
+# Git workflow
+git add . && git commit -m "Description" && git push
+```
+
+### Key Widget Identifiers
+```dart
+// For testing - these ValueKeys are set:
+find.byKey(ValueKey('firstName'))   // First name field
+find.byKey(ValueKey('resident'))    // Resident toggle
+find.byKey(ValueKey('subscribe'))   // Subscribe checkbox
+find.text('Submit')                 // Submit button
+find.text('Reset')                  // Reset button
+```
+
 ## 🤝 Contributing
 
 1. Fork the repository
