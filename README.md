@@ -8,8 +8,10 @@ A Flutter application that dynamically generates forms from JSON configurations 
 - **Split Panel Interface**: Horizontal resizable panels for JSON input and form preview
 - **JSON Formatting**: Built-in JSON formatter with syntax validation
 - **Field Dependencies**: Conditional field enabling/disabling based on other field values
+- **Complex Toggle Dependencies**: Mutual exclusion and chain reactions between toggle fields
 - **Form Validation**: Real-time validation with custom rules and error handling
 - **Multiple Field Types**: Support for text, email, number, dropdown, checkbox, and toggle fields
+- **Grouped Fields**: Organize fields into labeled groups with bordered containers
 - **Form Submission & Reset**: Complete form lifecycle management
 - **Comprehensive Testing**: Integration tests covering all major functionality
 
@@ -30,17 +32,18 @@ A Flutter application that dynamically generates forms from JSON configurations 
 
 ## 🎯 Supported Field Types
 
-| Type | Description | Validation |
-|------|-------------|------------|
-| `text` | Basic text input | Required, length validation |
-| `email` | Email input with validation | Email format validation |
-| `number` | Numeric input | Min/max value validation |
-| `dropdown` | Select from predefined options | Required selection |
-| `checkbox` | Boolean checkbox | Required checking |
-| `toggle` | Switch toggle | Conditional dependencies |
+| Type | Description | Validation | Advanced Features |
+|------|-------------|------------|------------------|
+| `text` | Basic text input | Required, length validation | Default values, grouping |
+| `email` | Email input with validation | Email format validation | Default values, grouping |
+| `number` | Numeric input | Min/max value validation | Grouping |
+| `dropdown` | Select from predefined options | Required selection | Grouping |
+| `checkbox` | Boolean checkbox | Required checking | Conditional dependencies |
+| `toggle` | Switch toggle | Conditional dependencies | Mutual exclusion, chain reactions |
 
-## 📋 JSON Schema Example
+## 📋 JSON Schema Examples
 
+### Basic Form Example
 ```json
 {
   "title": "User Registration Form",
@@ -53,27 +56,50 @@ A Flutter application that dynamically generates forms from JSON configurations 
       "placeholder": "Enter your first name"
     },
     {
-      "name": "age",
-      "type": "number",
-      "label": "Age",
-      "required": false,
-      "min": 20,
-      "max": 85
-    },
-    {
-      "name": "subscribe",
-      "type": "checkbox",
-      "label": "Subscribe to newsletter",
-      "required": false,
-      "dependsOn": "resident",
-      "dependsValue": true
-    },
-    {
       "name": "resident",
       "type": "toggle",
       "label": "Resident",
       "required": false,
       "defaultValue": true
+    }
+  ]
+}
+```
+
+### Advanced Form with Groups and Complex Dependencies
+```json
+{
+  "title": "Security Settings Configuration",
+  "fields": [
+    {
+      "name": "username",
+      "type": "text",
+      "label": "Username",
+      "required": true,
+      "group": "Account Information"
+    },
+    {
+      "name": "biometricLogin",
+      "type": "toggle",
+      "label": "Biometric Login",
+      "defaultValue": false,
+      "group": "Security Features",
+      "togglesOff": "smsNotifications"
+    },
+    {
+      "name": "smsNotifications",
+      "type": "toggle",
+      "label": "SMS Notifications",
+      "defaultValue": true,
+      "group": "Security Features",
+      "togglesOff": "biometricLogin"
+    },
+    {
+      "name": "notes",
+      "type": "text",
+      "label": "Security Notes",
+      "defaultValue": "Default security notes...",
+      "group": "Additional Notes"
     }
   ]
 }
@@ -85,12 +111,28 @@ The application includes comprehensive integration tests covering:
 
 ### Test Suite Overview
 
+#### Core Test Suite (app_test.dart)
 | Test | Description | Coverage |
 |------|-------------|----------|
 | **Test 1: Form Validation** | Only First Name set → Submit shows validation error | Required field validation |
 | **Test 2: Conditional Fields** | Resident toggle OFF → Subscribe checkbox disabled | Field dependencies |
 | **Test 3: Reset Functionality** | All fields filled → Reset restores defaults | Form state management |
 | **Bonus Test: Complete Flow** | Full form submission with success validation | End-to-end workflow |
+
+#### Advanced Test Suite (json_form_test.dart)
+| Test | Description | Coverage |
+|------|-------------|----------|
+| **JSON Form Creation** | Load JSON from file → Verify 8 fields in 3 groups | Grouped form generation |
+| **Complex Dependencies** | Test toggle mutual exclusion and chain reactions | Advanced toggle logic |
+| **Form Validation** | Required fields validation with grouped fields | Enhanced validation |
+| **Form Reset** | Reset grouped form to default values | Advanced state management |
+
+#### Toggle Dependencies Demo (toggle_demo_test.dart)
+| Test | Description | Coverage |
+|------|-------------|----------|
+| **Mutual Exclusion Demo** | Biometric ↔ SMS toggle interaction | Complex toggle dependencies |
+| **Chain Reaction Demo** | Session timeout and device tracking rules | Conditional field disabling |
+| **Form Submission Demo** | End-to-end with complex toggle states | Integration workflow |
 
 ### Test Implementation Details
 
@@ -150,10 +192,12 @@ The application includes comprehensive integration tests covering:
 1. **Open VS Code** in the project directory
 2. **Press F5** or go to **Run and Debug** panel (Ctrl+Shift+D)
 3. **Select test configuration:**
-   - `Run Integration Tests (All)` - Run all tests
-   - `Run Form Validation Test` - Test 1 only
-   - `Run Resident Toggle Test` - Test 2 only  
-   - `Run Reset Button Test` - Test 3 only
+   - `Run Integration Tests (All)` - Run original core tests
+   - `Run Toggle Dependencies Demo` - **NEW: Complex toggle dependencies demo**
+   - `Run JSON Form Test` - **NEW: Advanced grouped form tests**
+   - `Run Form Validation Test` - Individual core test
+   - `Run Resident Toggle Test` - Individual core test
+   - `Run Reset Button Test` - Individual core test
 
 #### Running Tests via VS Code Tasks
 
@@ -179,14 +223,14 @@ flutter test integration_test/app_test.dart -d linux
 
 #### Run Individual Tests
 ```bash
-# Form validation test
+# Core tests
 flutter test integration_test/form_validation_test.dart -d linux
-
-# Resident toggle test  
 flutter test integration_test/resident_toggle_test.dart -d linux
-
-# Reset button test
 flutter test integration_test/reset_button_test.dart -d linux
+
+# NEW: Advanced tests
+flutter test integration_test/toggle_demo_test.dart -d linux          # Complex toggle dependencies demo
+flutter test integration_test/json_form_test.dart -d linux            # Advanced grouped form tests
 ```
 
 #### Run Tests with Verbose Output
@@ -222,32 +266,44 @@ Form validation failed
 
 ```
 lib/
-  ├── main.dart                 # Main app entry point
+  ├── main.dart                 # Main app entry point with grouped fields support
 integration_test/
-  ├── app_test.dart            # Comprehensive test suite
+  ├── app_test.dart            # Original comprehensive test suite
+  ├── json_form_test.dart      # NEW: Advanced grouped form tests
+  ├── toggle_demo_test.dart    # NEW: Complex toggle dependencies demo
+  ├── json_files/              # NEW: Test JSON configurations
+  │   └── security_settings_form.json # Advanced form with groups & dependencies
   ├── form_validation_test.dart # Individual validation test
   ├── resident_toggle_test.dart # Individual toggle test  
   └── reset_button_test.dart   # Individual reset test
 .vscode/
-  ├── launch.json             # VS Code debugger config
+  ├── launch.json             # VS Code debugger config (updated with new tests)
   └── tasks.json              # VS Code task runner config
 ```
 
 ## 🎯 Key Implementation Highlights
 
-### Conditional Field Dependencies
-- Fields can depend on other field values using `dependsOn` and `dependsValue`
+### Grouped Field Organization
+- Fields can be organized into visual groups using the `group` property
+- Groups are rendered as bordered containers with labeled headers
+- Supports mixed grouped and ungrouped fields in the same form
+
+### Complex Toggle Dependencies
+- **Mutual Exclusion**: Use `togglesOff` to automatically turn off another toggle
+- **Conditional Disabling**: Use `dependsOn` and `dependsValue` for conditional field states
+- **Chain Reactions**: Multiple toggles can affect each other in complex ways
 - Real-time UI updates when dependency conditions change
-- Form rebuilding triggered by state changes
 
 ### Form Validation Strategy
 - Client-side validation using FormBuilder validators
 - Custom validation rules for specific business logic
 - Comprehensive error handling and user feedback
+- Support for default values in text and toggle fields
 
 ### Testing Approach  
 - Widget testing for UI component verification
 - Integration testing for end-to-end user workflows
+- Complex dependency testing with realistic scenarios
 - Debugger-friendly test structure for development
 
 ## 🔧 Technical Architecture Deep Dive

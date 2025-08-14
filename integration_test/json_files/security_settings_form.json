@@ -1,0 +1,80 @@
+{
+  "title": "Security Settings Configuration",
+  "fields": [
+    {
+      "name": "username",
+      "type": "text",
+      "label": "Username",
+      "required": true,
+      "placeholder": "Enter your username",
+      "group": "Account Information"
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "label": "Email Address",
+      "required": true,
+      "placeholder": "Enter your email",
+      "group": "Account Information"
+    },
+    {
+      "name": "twoFactorAuth",
+      "type": "toggle",
+      "label": "Two-Factor Authentication",
+      "required": false,
+      "defaultValue": true,
+      "group": "Security Features"
+    },
+    {
+      "name": "biometricLogin",
+      "type": "toggle",
+      "label": "Biometric Login (Mutually exclusive with SMS)",
+      "required": false,
+      "defaultValue": false,
+      "dependsOn": "twoFactorAuth",
+      "dependsValue": true,
+      "group": "Security Features",
+      "togglesOff": "smsNotifications"
+    },
+    {
+      "name": "smsNotifications",
+      "type": "toggle",
+      "label": "SMS Security Notifications (Mutually exclusive with Biometric)",
+      "required": false,
+      "defaultValue": true,
+      "dependsOn": "twoFactorAuth",
+      "dependsValue": true,
+      "group": "Security Features",
+      "togglesOff": "biometricLogin"
+    },
+    {
+      "name": "sessionTimeout",
+      "type": "toggle",
+      "label": "Auto Session Timeout (Disabled when SMS is ON)",
+      "required": false,
+      "defaultValue": false,
+      "group": "Security Features",
+      "dependsOn": "smsNotifications",
+      "dependsValue": false
+    },
+    {
+      "name": "deviceTracking",
+      "type": "toggle",
+      "label": "Device Activity Tracking (Disabled when Biometric is ON)",
+      "required": false,
+      "defaultValue": false,
+      "group": "Security Features",
+      "dependsOn": "biometricLogin",
+      "dependsValue": false
+    },
+    {
+      "name": "notes",
+      "type": "text",
+      "label": "Security Notes",
+      "required": false,
+      "placeholder": "Optional security notes or comments",
+      "defaultValue": "Please review these settings regularly for optimal security.",
+      "group": "Additional Notes"
+    }
+  ]
+}

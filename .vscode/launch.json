@@ -47,6 +47,28 @@
         "-d",
         "linux"
       ]
+    },
+    {
+      "name": "Run Toggle Dependencies Demo",
+      "type": "dart",
+      "request": "launch",
+      "program": "integration_test/toggle_demo_test.dart",
+      "args": [
+        "-d",
+        "linux"
+      ],
+      "console": "debugConsole"
+    },
+    {
+      "name": "Run JSON Form Test",
+      "type": "dart",
+      "request": "launch", 
+      "program": "integration_test/json_form_test.dart",
+      "args": [
+        "-d",
+        "linux"
+      ],
+      "console": "debugConsole"
     }
   ]
 }

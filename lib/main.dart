@@ -197,6 +197,8 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
     final String label = fieldConfig['label'] ?? name;
     final bool required = fieldConfig['required'] ?? false;
     final String? placeholder = fieldConfig['placeholder'];
+    final dynamic defaultValue = fieldConfig['defaultValue'];
+    final String? defaultStringValue = (type == 'text' || type == 'email') ? defaultValue?.toString() : null;
     
     // Check if this field should be disabled based on other field values
     final String? dependsOn = fieldConfig['dependsOn'];
@@ -215,6 +217,7 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
           return FormBuilderTextField(
             name: name,
             key: ValueKey(name),
+            initialValue: defaultStringValue,
             decoration: InputDecoration(
               labelText: label,
               hintText: placeholder,
@@ -286,8 +289,16 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
             key: ValueKey(name),
             title: Text(label),
             initialValue: fieldConfig['defaultValue'] ?? false,
+            enabled: isEnabled,
             validator: required ? FormBuilderValidators.required() : null,
             onChanged: (value) {
+              // Handle mutual exclusion - turn off the other toggle if specified
+              final String? togglesOff = fieldConfig['togglesOff'];
+              if (value == true && togglesOff != null && _formKey.currentState != null) {
+                // Turn off the other toggle
+                _formKey.currentState!.fields[togglesOff]?.didChange(false);
+              }
+              
               // Trigger a rebuild to update dependent fields
               setState(() {});
             },
@@ -313,6 +324,66 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
         ),
       );
     }
+  }
+
+  List<Widget> _buildGroupedFields() {
+    final fields = (_jsonData!['fields'] as List)
+        .where((field) => field is Map<String, dynamic>)
+        .cast<Map<String, dynamic>>()
+        .toList();
+
+    // Group fields by group name
+    final Map<String, List<Map<String, dynamic>>> groupedFields = {};
+    for (final field in fields) {
+      final groupName = field['group'] as String? ?? '';
+      groupedFields.putIfAbsent(groupName, () => []).add(field);
+    }
+
+    final List<Widget> widgets = [];
+    
+    // Add ungrouped fields first (fields without group)
+    if (groupedFields.containsKey('')) {
+      widgets.addAll(
+        groupedFields['']!.map((field) => Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: _buildFormField(field),
+        ))
+      );
+    }
+
+    // Add grouped fields
+    for (final entry in groupedFields.entries) {
+      if (entry.key.isEmpty) continue; // Skip ungrouped fields (already added)
+      
+      widgets.add(
+        Card(
+          margin: const EdgeInsets.only(bottom: 16.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.key,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...entry.value.map((field) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _buildFormField(field),
+                )),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
   }
 
   Widget _buildFormPanel() {
@@ -363,12 +434,7 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
                                     ),
                                   ),
                                 ),
-                              ...(_jsonData!['fields'] as List)
-                                  .where((field) => field is Map<String, dynamic>)
-                                  .map((field) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 16.0),
-                                        child: _buildFormField(field as Map<String, dynamic>),
-                                      )),
+                              ..._buildGroupedFields(),
                               const SizedBox(height: 24),
                               Row(
                                 children: [
