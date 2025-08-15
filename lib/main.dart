@@ -36,6 +36,7 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
   Map<String, dynamic>? _jsonData;
   String? _errorMessage;
+  bool _isUpdatingMutualExclusion = false; // Prevent infinite loops
 
   final String _defaultJson = '''{
   "title": "User Registration Form",
@@ -292,11 +293,23 @@ class _JsonToFormScreenState extends State<JsonToFormScreen> {
             enabled: isEnabled,
             validator: required ? FormBuilderValidators.required() : null,
             onChanged: (value) {
-              // Handle mutual exclusion - turn off the other toggle if specified
+              // Prevent infinite loops in mutual exclusion
+              if (_isUpdatingMutualExclusion) return;
+              
+              // Handle mutual exclusion - ensure exactly one toggle is always ON
               final String? togglesOff = fieldConfig['togglesOff'];
-              if (value == true && togglesOff != null && _formKey.currentState != null) {
-                // Turn off the other toggle
-                _formKey.currentState!.fields[togglesOff]?.didChange(false);
+              if (togglesOff != null && _formKey.currentState != null) {
+                _isUpdatingMutualExclusion = true; // Set flag to prevent recursion
+                
+                if (value == true) {
+                  // Turn off the other toggle when this one is turned ON
+                  _formKey.currentState!.fields[togglesOff]?.didChange(false);
+                } else {
+                  // Turn on the other toggle when this one is turned OFF (mutual exclusion)
+                  _formKey.currentState!.fields[togglesOff]?.didChange(true);
+                }
+                
+                _isUpdatingMutualExclusion = false; // Clear flag after update
               }
               
               // Trigger a rebuild to update dependent fields
