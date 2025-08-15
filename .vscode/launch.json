@@ -80,6 +80,17 @@
         "linux"
       ],
       "console": "debugConsole"
+    },
+    {
+      "name": "Run All Tests (Device Compatible)",
+      "type": "dart",
+      "request": "launch",
+      "program": "integration_test/all_tests_device_compatible.dart",
+      "args": [
+        "-d",
+        "linux"
+      ],
+      "console": "debugConsole"
     }
   ]
 }

@@ -192,7 +192,8 @@ The application includes comprehensive integration tests covering:
 1. **Open VS Code** in the project directory
 2. **Press F5** or go to **Run and Debug** panel (Ctrl+Shift+D)
 3. **Select test configuration:**
-   - `Run All Integration Tests (Master File)` - **NEW: All tests in one run**
+   - `Run All Tests (Device Compatible)` - **NEW: All tests for remote devices**
+   - `Run All Integration Tests (Master File)` - **NEW: All tests in one run (desktop)**
    - `Run Integration Tests (All)` - Run original core tests
    - `Run Toggle Dependencies Demo` - **NEW: Complex toggle dependencies demo**
    - `Run JSON Form Test` - **NEW: Advanced grouped form tests**
@@ -221,17 +222,22 @@ The application includes comprehensive integration tests covering:
 
 **⚠️ Important:** Running `flutter test integration_test/ -d linux` will fail after the first test due to debug connection issues. Use these solutions instead:
 
-**Option A: Master Test File (Recommended)**
+**Option A: Master Test File (Desktop/Linux)**
 ```bash
 flutter test integration_test/all_tests.dart -d linux
 ```
 
-**Option B: Shell Script (Alternative)**
+**Option B: Device Compatible (Remote Devices)**
+```bash
+flutter test integration_test/all_tests_device_compatible.dart -d 192.168.x.x:5555
+```
+
+**Option C: Shell Script (Alternative)**
 ```bash
 ./run_all_tests.sh
 ```
 
-**Option C: Individual Tests (Most Reliable)**
+**Option D: Individual Tests (Most Reliable)**
 ```bash
 flutter test integration_test/app_test.dart -d linux
 ```
@@ -283,19 +289,22 @@ Form validation failed
 lib/
   ├── main.dart                 # Main app entry point with grouped fields support
 integration_test/
-  ├── all_tests.dart           # NEW: Master file to run all tests together
+  ├── all_tests.dart           # Master file to run all tests together (desktop)
+  ├── all_tests_device_compatible.dart # NEW: Device-compatible version (no file I/O)
   ├── app_test.dart            # Original comprehensive test suite
-  ├── json_form_test.dart      # NEW: Advanced grouped form tests
-  ├── toggle_demo_test.dart    # NEW: Complex toggle dependencies demo
-  ├── json_files/              # NEW: Test JSON configurations
+  ├── json_form_test.dart      # Advanced grouped form tests (uses file I/O)
+  ├── json_form_device_test.dart # NEW: Device-compatible version
+  ├── toggle_demo_test.dart    # Complex toggle dependencies demo (uses file I/O)
+  ├── toggle_demo_device_test.dart # NEW: Device-compatible version
+  ├── json_files/              # Test JSON configurations
   │   └── security_settings_form.json # Advanced form with groups & dependencies
   ├── form_validation_test.dart # Individual validation test
   ├── resident_toggle_test.dart # Individual toggle test  
   └── reset_button_test.dart   # Individual reset test
-├── run_all_tests.sh         # NEW: Shell script to run all tests sequentially
-├── run_tests_simple.sh      # NEW: Simple test runner script
+├── run_all_tests.sh         # Shell script to run all tests sequentially
+├── run_tests_simple.sh      # Simple test runner script
 .vscode/
-  ├── launch.json             # VS Code debugger config (updated with new tests)
+  ├── launch.json             # VS Code debugger config (updated with device tests)
   └── tasks.json              # VS Code task runner config
 ```
 
@@ -323,6 +332,12 @@ integration_test/
 - Integration testing for end-to-end user workflows
 - Complex dependency testing with realistic scenarios
 - Debugger-friendly test structure for development
+
+### Device Compatibility
+- **Desktop/Linux**: Use tests with file I/O (e.g., `toggle_demo_test.dart`)
+- **Remote Devices**: Use device-compatible tests with embedded JSON (e.g., `toggle_demo_device_test.dart`)
+- **File I/O Issues**: Remote devices may not access local files, so JSON is embedded directly in device tests
+- **VS Code Integration**: Both desktop and device-compatible test configurations available
 
 ## 🔧 Technical Architecture Deep Dive
 
