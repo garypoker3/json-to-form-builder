@@ -69,6 +69,17 @@
         "linux"
       ],
       "console": "debugConsole"
+    },
+    {
+      "name": "Run All Integration Tests (Master File)",
+      "type": "dart",
+      "request": "launch",
+      "program": "integration_test/all_tests.dart",
+      "args": [
+        "-d",
+        "linux"
+      ],
+      "console": "debugConsole"
     }
   ]
 }

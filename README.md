@@ -192,6 +192,7 @@ The application includes comprehensive integration tests covering:
 1. **Open VS Code** in the project directory
 2. **Press F5** or go to **Run and Debug** panel (Ctrl+Shift+D)
 3. **Select test configuration:**
+   - `Run All Integration Tests (Master File)` - **NEW: All tests in one run**
    - `Run Integration Tests (All)` - Run original core tests
    - `Run Toggle Dependencies Demo` - **NEW: Complex toggle dependencies demo**
    - `Run JSON Form Test` - **NEW: Advanced grouped form tests**
@@ -217,6 +218,20 @@ The application includes comprehensive integration tests covering:
 ### Option 2: Terminal Commands
 
 #### Run All Tests
+
+**⚠️ Important:** Running `flutter test integration_test/ -d linux` will fail after the first test due to debug connection issues. Use these solutions instead:
+
+**Option A: Master Test File (Recommended)**
+```bash
+flutter test integration_test/all_tests.dart -d linux
+```
+
+**Option B: Shell Script (Alternative)**
+```bash
+./run_all_tests.sh
+```
+
+**Option C: Individual Tests (Most Reliable)**
 ```bash
 flutter test integration_test/app_test.dart -d linux
 ```
@@ -268,6 +283,7 @@ Form validation failed
 lib/
   ├── main.dart                 # Main app entry point with grouped fields support
 integration_test/
+  ├── all_tests.dart           # NEW: Master file to run all tests together
   ├── app_test.dart            # Original comprehensive test suite
   ├── json_form_test.dart      # NEW: Advanced grouped form tests
   ├── toggle_demo_test.dart    # NEW: Complex toggle dependencies demo
@@ -276,6 +292,8 @@ integration_test/
   ├── form_validation_test.dart # Individual validation test
   ├── resident_toggle_test.dart # Individual toggle test  
   └── reset_button_test.dart   # Individual reset test
+├── run_all_tests.sh         # NEW: Shell script to run all tests sequentially
+├── run_tests_simple.sh      # NEW: Simple test runner script
 .vscode/
   ├── launch.json             # VS Code debugger config (updated with new tests)
   └── tasks.json              # VS Code task runner config
